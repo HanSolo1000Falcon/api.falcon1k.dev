@@ -7,7 +7,6 @@
  */
 
 import { getResponseJson, notFound } from '../index';
-import current from './current.json';
 
 export async function handlePollRequest(request: Request, env: Env) {
 	const url = new URL(request.url);
@@ -15,7 +14,9 @@ export async function handlePollRequest(request: Request, env: Env) {
 
 	switch (pathname) {
 		case '/current':
-			return new Response(JSON.stringify(current), {
+			const currentPoll = await env.POLL_KV.get('CurrentPoll', { type: 'json' });
+
+			return new Response(JSON.stringify(currentPoll), {
 				status: 200,
 				headers: {
 					'Content-Type': 'application/json',
@@ -27,6 +28,38 @@ export async function handlePollRequest(request: Request, env: Env) {
 
 		case '/upload':
 			return await handlePollUpload(request, env);
+
+		case '/manage':
+			if (request.method === 'OPTIONS') {
+				return getResponseJson(204, null, {
+					'Access-Control-Allow-Methods': 'POST, OPTIONS',
+				});
+			}
+
+			if (request.method !== 'POST') {
+				return getResponseJson(405, 'You can only send POST requests to this URL');
+			}
+
+			const suppliedSecret: string | null = request.headers.get('X-Auth-Key');
+			if (suppliedSecret !== env.SECRET_KEY) {
+				return getResponseJson(
+					401,
+					'Unauthorized. You must provide the correct secret key in the X-Auth-Key header to access this endpoint.',
+				);
+			}
+
+			const body: { pollName: string; options: string[] } = await request.json();
+			if (
+				body &&
+				typeof body.pollName === 'string' &&
+				Array.isArray(body.options) &&
+				body.options.every((option) => typeof option === 'string')
+			) {
+				await env.POLL_KV.put('CurrentPoll', JSON.stringify(body));
+				return getResponseJson(200, 'Successfully updated the current poll.');
+			} else {
+				return getResponseJson(400, 'Missing or malformed request body. Make sure to send a valid JSON body with the poll data.');
+			}
 
 		case '/fetch':
 			const json: Record<string, JSON> = {};
@@ -83,14 +116,25 @@ async function handlePollUpload(request: Request, env: Env) {
 	}
 
 	if (!json || typeof json.votedFor !== 'number') {
-		return getResponseJson(400, `Missing or malformed request body. Make sure you are sending a JSON body with a 'votedFor' property that is a number. Example: { "votedFor": 0 }`);
+		return getResponseJson(
+			400,
+			`Missing or malformed request body. Make sure you are sending a JSON body with a 'votedFor' property that is a number. Example: { "votedFor": 0 }`,
+		);
+	}
+
+	const current: { pollName: string; options: string[] } | null = await env.POLL_KV.get('CurrentPoll', { type: 'json' });
+
+	if (!current) {
+		return getResponseJson(400, 'There is no active poll to vote for.');
 	}
 
 	if (json.votedFor < 0 || json.votedFor >= current.options.length) {
 		return getResponseJson(400, "Correct request body but 'votedFor' was out of the bounds of the 'options' array.");
 	}
 
-	const row: { JsonData: string } | null = await env.DB.prepare('SELECT JsonData FROM Polls WHERE PollName = ?').bind(current.pollName).first();
+	const row: { JsonData: string } | null = await env.DB.prepare('SELECT JsonData FROM Polls WHERE PollName = ?')
+		.bind(current.pollName)
+		.first();
 	let currentPollData;
 	if (!row || !row.JsonData) {
 		currentPollData = { votes: [] };

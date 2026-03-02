@@ -7,6 +7,8 @@ declare namespace Cloudflare {
 	}
     interface Env {
         DB: D1Database;
+        POLL_KV: KVNamespace;
+        SECRET_KEY: string;
 	}
 }
 interface Env extends Cloudflare.Env {}

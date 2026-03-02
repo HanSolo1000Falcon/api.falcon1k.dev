@@ -1,9 +1,0 @@
-{
-	"pollName": "What's your preferred language to write Cloudflare Workers in?",
-	"options": [
-        "TypeScript",
-        "JavaScript",
-        "Rust",
-        "Python"
-	]
-}

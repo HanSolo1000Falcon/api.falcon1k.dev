@@ -16,5 +16,11 @@
 			"database_name": "api-db",
 			"database_id": "57f68a4d-44af-4687-a1ae-244fe0d198b4"
 		}
+	],
+	"kv_namespaces": [
+		{
+			"binding": "POLL_KV",
+			"id": "90089d2a564b4cc6a5222a95878d640e"
+		}
 	]
 }
