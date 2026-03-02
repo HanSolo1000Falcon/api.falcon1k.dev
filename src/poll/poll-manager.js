@@ -84,7 +84,9 @@ async function handlePollUpload(request, env) {
 		currentPollData = {votes: []};
 	} else {
 		currentPollData = JSON.parse(row.JsonData);
-		if (!currentPollData.votes) currentPollData.votes = [];
+		if (!currentPollData.votes) {
+			currentPollData.votes = [];
+		}
 	}
 
 	currentPollData.votes.push(json.votedFor);
