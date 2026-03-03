@@ -33,6 +33,7 @@ export async function handlePollRequest(request: Request, env: Env) {
 			if (request.method === 'OPTIONS') {
 				return getResponseJson(204, null, {
 					'Access-Control-Allow-Methods': 'POST, OPTIONS',
+					'Access-Control-Allow-Headers': 'Content-Type, X-Auth-Key',
 				});
 			}
 
