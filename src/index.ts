@@ -1,12 +1,20 @@
 import { STATUS_CODES } from 'http';
 import { handlePollRequest } from './poll/poll-manager';
 
+export { ViewCounterDO } from './view-counter/view-counter-durable';
+
 export default {
 	async fetch(request, env, ctx): Promise<Response> {
 		const url = new URL(request.url);
 
 		if (url.pathname.startsWith('/poll')) {
 			return await handlePollRequest(request, env);
+		}
+
+		if (url.pathname === '/view-count') {
+			const stub = env.VIEW_COUNTER_DO.getByName('view-count');
+			const count = await stub.incrementAndGet();
+			return new Response(count);
 		}
 
 		if (url.pathname === '/' || !url.pathname) {

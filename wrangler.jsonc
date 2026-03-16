@@ -10,6 +10,14 @@
 	"compatibility_flags": [
 		"nodejs_compat"
 	],
+	"migrations": [
+		{
+			"tag": "v1",
+			"new_sqlite_classes": [
+				"ViewCounterDO"
+			]
+		}
+	],
 	"d1_databases": [
 		{
 			"binding": "DB",
@@ -22,5 +30,13 @@
 			"binding": "POLL_KV",
 			"id": "90089d2a564b4cc6a5222a95878d640e"
 		}
-	]
+	],
+	"durable_objects": {
+		"bindings": [
+			{
+				"class_name": "ViewCounterDO",
+				"name": "VIEW_COUNTER_DO"
+			}
+		]
+	}
 }
