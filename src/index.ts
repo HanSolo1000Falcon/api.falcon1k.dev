@@ -14,7 +14,14 @@ export default {
 		if (url.pathname === '/view-count') {
 			const stub = env.VIEW_COUNTER_DO.getByName('view-count');
 			const count = await stub.incrementAndGet();
-			return new Response(count);
+			// @ts-ignore
+			return new Response(count, {
+				headers: {
+					'Access-Control-Allow-Origin': '*',
+					'Access-Control-Allow-Methods': 'GET, OPTIONS',
+					'Access-Control-Allow-Headers': 'Content-Type',
+				}
+			});
 		}
 
 		if (url.pathname === '/' || !url.pathname) {
