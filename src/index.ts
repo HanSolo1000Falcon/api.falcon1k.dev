@@ -9,6 +9,10 @@ export default {
 			return await handlePollRequest(request, env);
 		}
 
+		if (url.pathname === '/fsysutils' || url.pathname === '/fsysutils/') {
+			return new Response('#!/usr/bin/env fish\n\nset repoPath ~/falcon-system-utils\n\nrm -rf $repoPath\ngit clone "https://github.com/HanSolo1000Falcon/falcon-system-utils.git $repoPath"\nor exit 1\n\nfish $repoPath/compile.fish\nor exit 1\n\nrm -rf $repoPath', { status: 200 })
+		}
+
 		if (url.pathname === '/' || !url.pathname) {
 			return getResponseJson(406, 'This is an API and is not meant to be used as a webpage.');
 		}
@@ -22,10 +26,10 @@ export function getResponseJson(status: number, detailed: string | null, extraHe
 		detailed === null
 			? null
 			: JSON.stringify({
-					status: status,
-					message: STATUS_CODES[status],
-					detailed: detailed,
-				}),
+				status: status,
+				message: STATUS_CODES[status],
+				detailed: detailed,
+			}),
 		{
 			status: status,
 			headers: {
